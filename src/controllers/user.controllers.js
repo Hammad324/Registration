@@ -3,9 +3,14 @@ import bcrypt from "bcrypt";
 
 export const registerUser = async (req, res) => {
   try {
+    // check keys
+    const requiredKeys = ["name", "email", "password", "role"];
+    const requestKeys = Object.keys(req.body);
+
+    // check value
     const { name, email, password, role } = req.body;
-    // console.log(name, email, password, )
-    if (!name || !email || !password || !role) {
+    
+    if (requiredKeys.some(key => !requestKeys.includes(key))) {
       return res.status(406).json({
         message: "Column names should be correct, name, email, password, role.",
       });
