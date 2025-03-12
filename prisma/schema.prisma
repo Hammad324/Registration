@@ -13,10 +13,248 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id Int @id @default (autoincrement())
-  name String
-  email String @unique
+// model User {
+//   id Int @id @default (autoincrement())
+//   name String
+//   email String @unique
+//   created_at DateTime @default(now())
+//   updated_at DateTime @default(now()) @updatedAt
+// }
+
+model accountopen {
+  id        BigInt   @id @default(autoincrement())
+  ledger    String
+  code      String
+  title     String
+  createdAt DateTime? @db.Timestamp(0)
+  updatedAt DateTime? @db.Timestamp(0)
+}
+
+model accountopens {
+  id        BigInt   @id @default(autoincrement())
+  ledger    String
+  code      String
+  title     String
+  createdAt DateTime? @db.Timestamp(0)
+  updatedAt DateTime? @db.Timestamp(0)
+}
+
+model customers {
+  id          Int      @id @default(autoincrement())
+  fullName    String?  @db.VarChar(191)
+  contact     String?  @db.VarChar(191)
+  product     String?  @db.VarChar(191)
+  perKgPrice  String?  @db.VarChar(191)
+  address     String?  @db.VarChar(300)
+  city        String?  @db.VarChar(191)
+  createdAt   DateTime? @db.Timestamp(0)
+  updatedAt   DateTime @default(now()) @db.Timestamp(0)
+}
+
+model entries {
+  id        Int      @id @default(autoincrement())
+  account   String
+  shortText String?  @db.VarChar(500)
+  credit    String
+  amount    String
+  generalId Int
+  createdAt String?  @db.VarChar(190)
+  updatedAt String?  @db.VarChar(190)
+}
+
+model failed_jobs {
+  id          BigInt   @id @default(autoincrement())
+  uuid        String
+  connection  String
+  queue       String
+  payload     String
+  exception   String
+  failedAt    DateTime @db.Timestamp(0)
+}
+
+model generals {
+  id            BigInt   @id @default(autoincrement())
+  documentDate  String
+  postingDate   String
+  reference     String
+  doHeaderText  String
+  createdAt     DateTime? @db.Timestamp(0)
+  updatedAt     DateTime? @db.Timestamp(0)
+}
+
+model invoices {
+  id             Int      @id @default(autoincrement())
+  date           String?
+  product        String?
+  deliveryDate   String?
+  vehicleNo      String?
+  quantity       String?
+  bagCount       String?
+  ratePerKg      String?
+  amount         String?
+  clientName     String?
+  status         Int      @default(0)
+  trash          String?
+  deliveryCharge String?
+  handingCharge  String?
+  totalAmount    String?
+  totalAmountWord String?
+  createdAt      DateTime @default(now()) @db.Timestamp(0)
+  updatedAt      DateTime @default(now()) @db.Timestamp(0)
+}
+
+model ledgers {
+  id        BigInt   @id @default(autoincrement())
+  code      String
+  name      String
+  type      String
+  createdAt DateTime? @db.Timestamp(0)
+  updatedAt DateTime? @db.Timestamp(0)
+}
+
+model migrations {
+  id        Int      @id @default(autoincrement())
+  migration String
+  batch     Int
+}
+
+model model_has_permissions {
+  permissionId BigInt
+  modelType    String
+  modelId      BigInt
+  permission   permissions @relation(fields: [permissionId], references: [id])
+
+  @@id([permissionId, modelId, modelType])
+}
+
+model model_has_roles {
+  roleId    BigInt
+  modelType String
+  modelId   BigInt
+  role      roles @relation(fields: [roleId], references: [id])
+
+  @@id([roleId, modelId, modelType])
+}
+
+model particulars {
+  id          Int      @id @default(autoincrement())
+  particular  String?
+  rs          String?
+  ps          String?
+  createdAt   DateTime @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime @default(now()) @db.Timestamp(0)
+  voucherId   Int?
+  totalAmount String?
+}
+
+model password_resets {
+  email      String
+  token      String
+  createdAt  DateTime? @db.Timestamp(0)
+
+  @@id([email])
+}
+
+model password_reset_tokens {
+  email     String
+  token     String
+  createdAt DateTime? @db.Timestamp(0)
+
+  @@id([email])
+}
+
+model permissions {
+  id        BigInt   @id @default(autoincrement())
+  name      String
+  guardName String
+  createdAt DateTime? @db.Timestamp(0)
+  updatedAt DateTime? @db.Timestamp(0)
+
+  role_has_permissions role_has_permissions[]
+
+  model_has_permissions model_has_permissions[]
+}
+
+model personal_access_tokens {
+  id            BigInt   @id @default(autoincrement())
+  tokenableType String
+  tokenableId   BigInt
+  name          String
+  token         String
+  abilities     String?
+  lastUsedAt    DateTime? @db.Timestamp(0)
+  createdAt     DateTime? @db.Timestamp(0)
+  updatedAt     DateTime? @db.Timestamp(0)
+}
+
+model purchases {
+  id        Int      @id @default(autoincrement())
+  date      String?
+  vendorId  Int?
+  vehicle   String?
+  weight    Float?
+  mound     Float?
+  rate      String?
+  amount    String?
+  balance   String?
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+}
+
+model roles {
+  id        BigInt   @id @default(autoincrement())
+  name      String
+  guardName String
+  createdAt DateTime? @db.Timestamp(0)
+  updatedAt DateTime? @db.Timestamp(0)
+
+  role_has_permissions role_has_permissions[]
+
+  model_has_roles model_has_roles[]
+}
+
+model role_has_permissions {
+  permissionId BigInt
+  roleId       BigInt
+  permission   permissions @relation(fields: [permissionId], references: [id])
+  role         roles       @relation(fields: [roleId], references: [id])
+
+  @@id([permissionId, roleId])
+}
+
+model users {
+  id              Int   @id @default(autoincrement())
+  name            String
+  email           String   @unique
+  emailVerifiedAt DateTime?
+  password        String
+  role            Role @default(User)
+  rememberToken   String?
   created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
+   updated_at DateTime @default(now()) @updatedAt
+}
+
+enum Role {
+  Admin
+  User
+}
+
+model vendors {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  phoneNumber String?
+  address   String?
+  city      String?
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+}
+
+model vouchers {
+  id         Int      @id @default(autoincrement())
+  payTo      String?
+  date       String?
+  payIn      String?
+  onAmountOf String?
+  createdAt  DateTime @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime @default(now()) @db.Timestamp(0)
 }
