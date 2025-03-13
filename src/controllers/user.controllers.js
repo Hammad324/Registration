@@ -1,5 +1,6 @@
 import { prisma } from "../db/connectDB.js";
 import bcrypt from "bcrypt";
+import { generateToken } from "../utils/generateJWTtoken.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -76,10 +77,80 @@ export const registerUser = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Internal Server Error",
-      Error: error.message,
+      "message": "Internal Server Error",
+      "Error": error.message,
     });
   }
 };
 
-export const userLogin = async (req, res) => {};
+export const userLogin = async (req, res) => {
+  try {
+    const {email, password} = req.body;
+
+    if ([email, password].some(field => field.trim() === "")) {
+      return res.status(400).json({
+        "message": "All fields are required."
+      })
+    }
+
+    const doesUserExist = await prisma.users.findUnique({
+      where: {
+        email: email
+      }
+    }); 
+
+    if (!doesUserExist) {
+      return res.status(400).json({
+        "message": "User does not exist, please register."
+      })
+    };
+
+    const comparePassword = await bcrypt.compare(password, doesUserExist.password);
+
+    if (!comparePassword) {
+      return res.status(400).json({
+        "message": "Incorrect Password."
+      });
+    }
+
+    const user = await prisma.users.findUnique({
+      where: {
+        email: doesUserExist.email
+      },
+      omit: {
+        password: true,
+        rememberToken: true,
+        emailVerifiedAt: true,
+      },
+    })
+
+    // if everything correct.
+    const token = await generateToken(user);
+    // console.log(token)
+    
+    if (!token) {
+      return res.status(400).json({
+        "message": "Token could not be generated."
+      });
+    }
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
+    return res.status(200).cookie("token", token, options).json({
+      "message": `${user.name} has logged in.`,
+      "user": user,
+      "token": token
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      "message": "Internal Server Error",
+      "Error": error.message,
+    });
+  }
+};
+
+export const userLogout = async (req, res) => {
+  
+}
