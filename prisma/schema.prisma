@@ -228,6 +228,7 @@ model users {
   email           String   @unique
   emailVerifiedAt DateTime?
   password        String
+  status          Int @default(1)
   role            Role @default(User)
   rememberToken   String?
   created_at DateTime @default(now())

@@ -6,16 +6,17 @@ export const verifyJWT = async (req, res, next) => {
         const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer", "").trim();
 
         if (!token) {
-            res.status(401).json({
-                "message": "Unauthorized access, token not found."
+            return res.status(401).json({
+                "message": "Unauthorized access, token not found. Login Please.",
+                "status": "Error"
             })
         };
 
-        const decodedToken = jwt.verify(token, JWT_TOKEN_SECRET);
-
+        const decodedToken = jwt.verify(token, process.env.JWT_TOKEN_SECRET);
+        
         const user = await prisma.users.findUnique({
             where: {
-                id: decodedToken?.id
+                id: decodedToken.id
             },
             omit: {
                 password: true,
@@ -23,16 +24,20 @@ export const verifyJWT = async (req, res, next) => {
                 emailVerifiedAt: true,
             }
         });
-
         if (!user) {
-            res.status(401).json({
-                "message": "User not found. Incorrect Token."
+            return res.status(401).json({
+                "message": "User not found. Invalid Token.",
+                "status": "Error"
             })
         }
 
         req.user = user;
         next();
+
     } catch (error) {
-        console.log(`Error: ${error.message}`);
+        return res.status(400).json({
+            "Error from middleware catch block": error.message,
+            "status": "Error"  
+        })
     }
 }

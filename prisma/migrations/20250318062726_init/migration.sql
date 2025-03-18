@@ -241,6 +241,7 @@ CREATE TABLE `users` (
     `email` VARCHAR(191) NOT NULL,
     `emailVerifiedAt` DATETIME(3) NULL,
     `password` VARCHAR(191) NOT NULL,
+    `status` INTEGER NOT NULL DEFAULT 1,
     `role` ENUM('Admin', 'User') NOT NULL DEFAULT 'User',
     `rememberToken` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

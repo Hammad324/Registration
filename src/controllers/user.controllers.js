@@ -126,31 +126,43 @@ export const userLogin = async (req, res) => {
 
     // if everything correct.
     const token = await generateToken(user);
-    // console.log(token)
     
     if (!token) {
       return res.status(400).json({
         "message": "Token could not be generated."
       });
     }
-    const options = {
-      httpOnly: true,
-      secure: true
-    }
-    return res.status(200).cookie("token", token, options).json({
+
+    return res.status(200).json({
       "message": `${user.name} has logged in.`,
-      "user": user,
+      "status": "Success",
+      "data": user,
       "token": token
     })
 
   } catch (error) {
     return res.status(500).json({
       "message": "Internal Server Error",
+      "status": "Error",
       "Error": error.message,
     });
   }
 };
 
-export const userLogout = async (req, res) => {
-  
+export const userLogout = (_,res) => {
+  try {
+    return res.status(200).json({
+      "message": `User has logged out.`,
+    })
+  } catch (error) {
+    return res.status(500).json({
+      "Error logging out": error.message
+    })
+  }
+};
+
+export const getUser = async (req, res) => {
+  res.status(200).json({
+    "message": req.user
+  })
 }
