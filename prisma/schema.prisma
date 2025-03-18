@@ -232,7 +232,7 @@ model users {
   role            Role @default(User)
   rememberToken   String?
   created_at DateTime @default(now())
-   updated_at DateTime @default(now()) @updatedAt
+  updated_at DateTime @default(now()) @updatedAt
 }
 
 enum Role {

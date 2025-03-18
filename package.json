@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate:seed": "npx prisma migrate dev --name init && node prisma/seed.js"
   },
   "keywords": [],
   "author": "Hammad Farrukh Rohilla",
@@ -13,6 +14,7 @@
   "type": "module",
   "dependencies": {
     "@prisma/client": "^6.4.1",
+    "argon2": "^0.41.1",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",

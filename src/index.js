@@ -16,6 +16,7 @@ connectDB()
 .catch(async (error) => {
     console.log(`Error Found: ${error.message}`)
     await prisma.$disconnect();
+    process.exit(1);
 });
 
 

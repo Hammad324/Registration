@@ -1,6 +1,7 @@
 import { prisma } from "../db/connectDB.js";
-import bcrypt from "bcrypt";
+import argon2 from "argon2";
 import { generateToken } from "../utils/generateJWTtoken.js";
+import { comparePasswordHash, hashPassword } from "../utils/handlePassword.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -15,13 +16,13 @@ export const registerUser = async (req, res) => {
       return res.status(406).json({
         message: "Column names should be correct, name, email, password, role.",
       });
-    }
+    };
 
     if ([name, email, password, role].some((field) => field?.trim() === "")) {
       return res.status(406).json({
         message: "All fields are required.",
       });
-    }
+    };
 
     const availableRoles = ["Admin", "User"]
 
@@ -29,7 +30,7 @@ export const registerUser = async (req, res) => {
         return res.status(406).json({
             message: "Role does not match.",
           });
-    }
+    };
 
     const existedUser = await prisma.users.findUnique({
       where: {
@@ -41,9 +42,9 @@ export const registerUser = async (req, res) => {
       return res.status(409).json({
         message: "User with this name / email already exists.",
       });
-    }
+    };
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
 
     const user = await prisma.users.create({
       data: {
@@ -58,7 +59,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({
         message: "Could not register user.",
       });
-    }
+    };
 
     const createdUser = await prisma.users.findUnique({
       where: {
@@ -91,7 +92,7 @@ export const userLogin = async (req, res) => {
       return res.status(400).json({
         "message": "All fields are required."
       })
-    }
+    };
 
     const doesUserExist = await prisma.users.findUnique({
       where: {
@@ -105,13 +106,13 @@ export const userLogin = async (req, res) => {
       })
     };
 
-    const comparePassword = await bcrypt.compare(password, doesUserExist.password);
+    const comparePassword = await comparePasswordHash(doesUserExist.password, password); // compare user pass
 
     if (!comparePassword) {
       return res.status(400).json({
         "message": "Incorrect Password."
       });
-    }
+    };
 
     const user = await prisma.users.findUnique({
       where: {
@@ -122,7 +123,7 @@ export const userLogin = async (req, res) => {
         rememberToken: true,
         emailVerifiedAt: true,
       },
-    })
+    });
 
     // if everything correct.
     const token = await generateToken(user);
@@ -131,14 +132,14 @@ export const userLogin = async (req, res) => {
       return res.status(400).json({
         "message": "Token could not be generated."
       });
-    }
+    };
 
     return res.status(200).json({
       "message": `${user.name} has logged in.`,
       "status": "Success",
       "data": user,
       "token": token
-    })
+    });
 
   } catch (error) {
     return res.status(500).json({
@@ -153,16 +154,16 @@ export const userLogout = (_,res) => {
   try {
     return res.status(200).json({
       "message": `User has logged out.`,
-    })
+    });
   } catch (error) {
     return res.status(500).json({
       "Error logging out": error.message
-    })
+    });
   }
 };
 
 export const getUser = async (req, res) => {
   res.status(200).json({
     "message": req.user
-  })
+  });
 }
