@@ -240,6 +240,13 @@ enum Role {
   User
 }
 
+model BlacklistedTokens {
+  id String @id @default(uuid())
+  token String @db.Text
+  @@unique([token(length: 300)])
+  blackListedAt DateTime @default(now()) // when was the token blacklisted
+}
+
 model vendors {
   id        Int      @id @default(autoincrement())
   name      String?
