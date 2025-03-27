@@ -14,7 +14,7 @@ const connectDB = async () => {
     // multiple entries
     // const user = await prisma.user.createMany({
     //     data: [
-    //         {name: "Alice", email: "alice@gamil.com"}, 
+    //         {name: "Alice", email: "alice@gamil.com"},
     //         {name: "Bob", email: "bob@gamil.com"}]
     // })
 
@@ -22,7 +22,7 @@ const connectDB = async () => {
     // const user = await prisma.user.findFirst({
     //     where:{
     //         name: "Hammad"
-    //     } 
+    //     }
     // })
 
     // update
@@ -46,15 +46,15 @@ const connectDB = async () => {
 
     // delete user
     const user = await prisma.user.delete({
-        where: {id : 3}
-    })
-    console.log(user)
-}
+        where: { id: 3 },
+    });
+    console.log(user);
+};
 
 connectDB()
-  .catch((e) => console.log(e))
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+    .catch((e) => console.log(e))
+    .finally(async () => {
+        await prisma.$disconnect();
+    });
 
 // prisma generate -> Updates prisma client so you can use the latest schema in your application.

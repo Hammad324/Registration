@@ -102,13 +102,14 @@ CREATE TABLE `invoices` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ledgers` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+CREATE TABLE `ledger` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NOT NULL,
     `code` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `type` VARCHAR(191) NOT NULL,
-    `createdAt` TIMESTAMP(0) NULL,
-    `updatedAt` TIMESTAMP(0) NULL,
+    `type` ENUM('Cr', 'Dr') NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -286,6 +287,9 @@ CREATE TABLE `vouchers` (
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `ledger` ADD CONSTRAINT `ledger_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `model_has_permissions` ADD CONSTRAINT `model_has_permissions_permissionId_fkey` FOREIGN KEY (`permissionId`) REFERENCES `permissions`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

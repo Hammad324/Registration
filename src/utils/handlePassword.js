@@ -8,4 +8,4 @@ export const hashPassword = async (password) => {
 // compare the hash and user provided password.
 export const comparePasswordHash = async (hashedPassword, password) => {
     return await argon2.verify(hashedPassword, password);
-}
+};

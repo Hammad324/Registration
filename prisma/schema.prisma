@@ -13,16 +13,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model User {
-//   id Int @id @default (autoincrement())
-//   name String
-//   email String @unique
-//   created_at DateTime @default(now())
-//   updated_at DateTime @default(now()) @updatedAt
-// }
-
 model accountopen {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt    @id @default(autoincrement())
   ledger    String
   code      String
   title     String
@@ -31,7 +23,7 @@ model accountopen {
 }
 
 model accountopens {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt    @id @default(autoincrement())
   ledger    String
   code      String
   title     String
@@ -40,80 +32,87 @@ model accountopens {
 }
 
 model customers {
-  id          Int      @id @default(autoincrement())
-  fullName    String?  @db.VarChar(191)
-  contact     String?  @db.VarChar(191)
-  product     String?  @db.VarChar(191)
-  perKgPrice  String?  @db.VarChar(191)
-  address     String?  @db.VarChar(300)
-  city        String?  @db.VarChar(191)
-  createdAt   DateTime? @db.Timestamp(0)
-  updatedAt   DateTime @default(now()) @db.Timestamp(0)
+  id         Int       @id @default(autoincrement())
+  fullName   String?   @db.VarChar(191)
+  contact    String?   @db.VarChar(191)
+  product    String?   @db.VarChar(191)
+  perKgPrice String?   @db.VarChar(191)
+  address    String?   @db.VarChar(300)
+  city       String?   @db.VarChar(191)
+  createdAt  DateTime? @db.Timestamp(0)
+  updatedAt  DateTime  @default(now()) @db.Timestamp(0)
 }
 
 model entries {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   account   String
-  shortText String?  @db.VarChar(500)
+  shortText String? @db.VarChar(500)
   credit    String
   amount    String
   generalId Int
-  createdAt String?  @db.VarChar(190)
-  updatedAt String?  @db.VarChar(190)
+  createdAt String? @db.VarChar(190)
+  updatedAt String? @db.VarChar(190)
 }
 
 model failed_jobs {
-  id          BigInt   @id @default(autoincrement())
-  uuid        String
-  connection  String
-  queue       String
-  payload     String
-  exception   String
-  failedAt    DateTime @db.Timestamp(0)
+  id         BigInt   @id @default(autoincrement())
+  uuid       String
+  connection String
+  queue      String
+  payload    String
+  exception  String
+  failedAt   DateTime @db.Timestamp(0)
 }
 
 model generals {
-  id            BigInt   @id @default(autoincrement())
-  documentDate  String
-  postingDate   String
-  reference     String
-  doHeaderText  String
-  createdAt     DateTime? @db.Timestamp(0)
-  updatedAt     DateTime? @db.Timestamp(0)
+  id           BigInt    @id @default(autoincrement())
+  documentDate String
+  postingDate  String
+  reference    String
+  doHeaderText String
+  createdAt    DateTime? @db.Timestamp(0)
+  updatedAt    DateTime? @db.Timestamp(0)
 }
 
 model invoices {
-  id             Int      @id @default(autoincrement())
-  date           String?
-  product        String?
-  deliveryDate   String?
-  vehicleNo      String?
-  quantity       String?
-  bagCount       String?
-  ratePerKg      String?
-  amount         String?
-  clientName     String?
-  status         Int      @default(0)
-  trash          String?
-  deliveryCharge String?
-  handingCharge  String?
-  totalAmount    String?
+  id              Int      @id @default(autoincrement())
+  date            String?
+  product         String?
+  deliveryDate    String?
+  vehicleNo       String?
+  quantity        String?
+  bagCount        String?
+  ratePerKg       String?
+  amount          String?
+  clientName      String?
+  status          Int      @default(0)
+  trash           String?
+  deliveryCharge  String?
+  handingCharge   String?
+  totalAmount     String?
   totalAmountWord String?
-  createdAt      DateTime @default(now()) @db.Timestamp(0)
-  updatedAt      DateTime @default(now()) @db.Timestamp(0)
+  createdAt       DateTime @default(now()) @db.Timestamp(0)
+  updatedAt       DateTime @default(now()) @db.Timestamp(0)
 }
 
-model ledgers {
-  id        BigInt   @id @default(autoincrement())
-  code      String
-  name      String
-  type      String
-  createdAt DateTime? @db.Timestamp(0)
-  updatedAt DateTime? @db.Timestamp(0)
+model ledger {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  code       String
+  name       String
+  type       ledgerType
+  user       users      @relation("userLedgers", fields: [userId], references: [id])
+  created_at DateTime   @default(now())
+  updated_at DateTime   @default(now()) @updatedAt
+}
+
+enum ledgerType {
+  Cr
+  Dr
 }
 
 model migrations {
-  id        Int      @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   migration String
   batch     Int
 }
@@ -131,7 +130,7 @@ model model_has_roles {
   roleId    BigInt
   modelType String
   modelId   BigInt
-  role      roles @relation(fields: [roleId], references: [id])
+  role      roles  @relation(fields: [roleId], references: [id])
 
   @@id([roleId, modelId, modelType])
 }
@@ -148,9 +147,9 @@ model particulars {
 }
 
 model password_resets {
-  email      String
-  token      String
-  createdAt  DateTime? @db.Timestamp(0)
+  email     String
+  token     String
+  createdAt DateTime? @db.Timestamp(0)
 
   @@id([email])
 }
@@ -164,7 +163,7 @@ model password_reset_tokens {
 }
 
 model permissions {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt    @id @default(autoincrement())
   name      String
   guardName String
   createdAt DateTime? @db.Timestamp(0)
@@ -176,7 +175,7 @@ model permissions {
 }
 
 model personal_access_tokens {
-  id            BigInt   @id @default(autoincrement())
+  id            BigInt    @id @default(autoincrement())
   tokenableType String
   tokenableId   BigInt
   name          String
@@ -202,7 +201,7 @@ model purchases {
 }
 
 model roles {
-  id        BigInt   @id @default(autoincrement())
+  id        BigInt    @id @default(autoincrement())
   name      String
   guardName String
   createdAt DateTime? @db.Timestamp(0)
@@ -223,16 +222,17 @@ model role_has_permissions {
 }
 
 model users {
-  id              Int   @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   name            String
-  email           String   @unique
+  email           String    @unique
   emailVerifiedAt DateTime?
   password        String
-  status          Int @default(1)
-  role            Role @default(User)
+  status          Int       @default(1)
+  role            Role      @default(User)
   rememberToken   String?
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
+  ledgers         ledger[]  @relation("userLedgers")
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @default(now()) @updatedAt
 }
 
 enum Role {
@@ -241,20 +241,21 @@ enum Role {
 }
 
 model BlacklistedTokens {
-  id String @id @default(uuid())
-  token String @db.Text
-  @@unique([token(length: 300)])
+  id            String   @id @default(uuid())
+  token         String   @db.Text
   blackListedAt DateTime @default(now()) // when was the token blacklisted
+
+  @@unique([token(length: 300)])
 }
 
 model vendors {
-  id        Int      @id @default(autoincrement())
-  name      String?
+  id          Int      @id @default(autoincrement())
+  name        String?
   phoneNumber String?
-  address   String?
-  city      String?
-  createdAt DateTime @default(now()) @db.Timestamp(0)
-  updatedAt DateTime @default(now()) @db.Timestamp(0)
+  address     String?
+  city        String?
+  createdAt   DateTime @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime @default(now()) @db.Timestamp(0)
 }
 
 model vouchers {

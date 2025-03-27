@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "migrate:seed": "npx prisma migrate dev --name init && node prisma/seed.js"
+    "migrate:seed": "npx prisma migrate reset && npx prisma migrate dev --name init && node prisma/seed.js"
   },
   "keywords": [],
   "author": "Hammad Farrukh Rohilla",
