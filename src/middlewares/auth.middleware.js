@@ -4,13 +4,16 @@ import jwt from "jsonwebtoken";
 
 export const verifyJWT = async (req, res, next) => {
     try {
+        const authHeader = req.header("Authorization");
+
         const token =
-            req.cookies?.token ||
-            req.header("Authorization")?.replace("Bearer", "").trim();
+            req.cookies?.token || authHeader?.startsWith("Bearer ")
+                ? authHeader.split(" ")[1]
+                : null;
 
         if (!token) {
             return res.status(401).json({
-                message: "Unauthorized access, token not found. Login Please.",
+                message: "Unauthorized access, token not found. Please log in.",
                 status: "Error",
             });
         }
@@ -19,7 +22,7 @@ export const verifyJWT = async (req, res, next) => {
 
         if (isBlacklisted) {
             return res.status(401).json({
-                message: "Blacklisted Token (change this error)",
+                message: "Session expired or token invalidated",
                 status: "Error",
             });
         }
@@ -38,19 +41,23 @@ export const verifyJWT = async (req, res, next) => {
                 status: true,
             },
         });
-        if (!user) {
-            return res.status(401).json({
-                message: "User not found. Invalid Token.",
+
+        if (!user || user.status !== 1) {
+            return res.status(403).json({
+                message: "Access denied. User not found or deactivated.",
                 status: "Error",
             });
         }
 
         req.user = user;
+        req.token = token;
         next();
     } catch (error) {
-        return res.status(400).json({
-            "Error from middleware catch block": error.message,
+        console.log("auth middleware", error.message);
+        return res.status(500).json({
+            message: "Invalid or expired token",
             status: "Error",
+            "Error from middleware catch block": error.message,
         });
     }
 };

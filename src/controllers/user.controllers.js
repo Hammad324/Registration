@@ -2,6 +2,8 @@ import { prisma } from "../db/connectDB.js";
 import { generateToken } from "../utils/generateJWTtoken.js";
 import { comparePasswordHash, hashPassword } from "../utils/handlePassword.js";
 import { blacklistToken } from "../utils/handleBlacklistedTokens.js";
+import { AVAILABLE_ROLES } from "../constants.js";
+import { checkIfFieldValid } from "../utils/checkFields.js";
 
 export const registerUser = async (req, res) => {
     try {
@@ -27,21 +29,15 @@ export const registerUser = async (req, res) => {
             });
         }
 
-        if (
-            [name, email, password, role].some(
-                (field) => typeof field !== "string" || field?.trim() === ""
-            )
-        ) {
-            // if the user is not entring a string.
+        if (!checkIfFieldValid(name, email, password, role)) {
             return res.status(406).json({
                 message: "All fields are required.",
                 status: "Error",
             });
         }
 
-        const availableRoles = ["Admin", "User"];
-
-        if (!availableRoles.includes(role)) {
+        // AVAILABLE_ROLES from constants.js
+        if (!AVAILABLE_ROLES.includes(role)) {
             return res.status(406).json({
                 message: "Role does not match.",
                 status: "Error",
@@ -83,7 +79,6 @@ export const registerUser = async (req, res) => {
                 id: user.id,
             },
             select: {
-                // using select is a more optimal way to remove sensitive data
                 id: true,
                 name: true,
                 email: true,
@@ -109,11 +104,7 @@ export const userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        if (
-            [email, password].some(
-                (field) => typeof field !== "string" || field.trim() === ""
-            )
-        ) {
+        if (!checkIfFieldValid(email, password)) {
             return res.status(400).json({
                 message: "All fields are required.",
                 status: "Error",
@@ -135,7 +126,7 @@ export const userLogin = async (req, res) => {
 
         if (doesUserExist.status === 2) {
             return res.status(403).json({
-                message: "User not allowed.",
+                message: "User not available.",
                 status: "Error",
             });
         }
@@ -143,7 +134,7 @@ export const userLogin = async (req, res) => {
         const comparePassword = await comparePasswordHash(
             doesUserExist.password,
             password
-        ); // compare user pass
+        );
 
         if (!comparePassword) {
             return res.status(400).json({
@@ -191,7 +182,7 @@ export const userLogin = async (req, res) => {
 
 export const userLogout = async (req, res) => {
     try {
-        const token = req.header("Authorization").replace("Bearer", "").trim();
+        const token = req.token;
         await blacklistToken(token); // blacklist the token
 
         return res.status(200).json({
@@ -208,7 +199,7 @@ export const userLogout = async (req, res) => {
 };
 
 export const getUser = async (req, res) => {
-    res.status(200).json({
+    return res.status(200).json({
         message: req.user,
     });
 };
@@ -224,11 +215,7 @@ export const changePassword = async (req, res) => {
 
         const { password, newPassword } = req.body;
 
-        if (
-            [password, newPassword].some(
-                (field) => typeof field !== "string" || field.trim() === ""
-            )
-        ) {
+        if (!checkIfFieldValid(password, newPassword)) {
             return res.status(406).json({
                 message: "All fields are required.",
                 status: "Error",
@@ -291,7 +278,7 @@ export const deleteUser = async (req, res) => {
             });
         }
         const { email } = req.body;
-        if (email !== "" && typeof email !== "string") {
+        if (!checkIfFieldValid(email)) {
             return res.status(400).json({
                 message: "Email should be a string and not empty.",
                 status: "Error",
@@ -300,7 +287,6 @@ export const deleteUser = async (req, res) => {
 
         const userExists = await prisma.users.findUnique({
             where: {
-                // id: req.user.id,
                 email,
             },
         });
@@ -313,7 +299,6 @@ export const deleteUser = async (req, res) => {
 
         await prisma.users.update({
             where: {
-                // id: req.user.id,
                 email,
             },
             data: {

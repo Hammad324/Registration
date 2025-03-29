@@ -1,35 +1,32 @@
+import { LEDGER_TYPES } from "../constants.js";
 import { prisma } from "../db/connectDB.js";
+import { checkIfFieldValid } from "../utils/checkFields.js";
 
 export const createLedger = async (req, res) => {
     try {
         const { code, name, type } = req.body;
 
-        if (
-            [code, name, type].some(
-                (field) => typeof field !== "string" || field?.trim() === ""
-            )
-        ) {
+        if (!checkIfFieldValid(code, name, type)) {
             return res.status(406).json({
                 message: "All fields are required.",
                 status: "Error",
             });
         }
-        const allowedTypes = ["Cr", "Dr"];
 
-        if (!allowedTypes.includes(type)) {
+        if (!LEDGER_TYPES.includes(type)) {
             return res.status(400).json({
                 message: "Ledger type can only be debit (Dr) or credit (Cr).",
                 status: "Error",
             });
         }
 
-        const ledgerExists = await prisma.ledger.findFirst({
+        const existingLedger = await prisma.ledger.findUnique({
             where: {
                 code,
             },
         });
 
-        if (ledgerExists) {
+        if (existingLedger) {
             return res.status(409).json({
                 message: "Ledger with this code already exists.",
                 status: "Error",
@@ -51,51 +48,69 @@ export const createLedger = async (req, res) => {
             data: ledger,
         });
     } catch (error) {
+        console.log(`Error creating ledger: ${error.message}`);
         return res.status(500).json({
             message: "Internal server error.",
             status: "Error",
-            error: error.message,
         });
     }
 };
 
-// export const updateDetails = async (req, res) => {
-//     try {
-//         const { name, email } = req.body;
-//         if (!name || !email) {
-//             return res.status(400).json({
-//                 message: "All fields are required",
-//             });
-//         }
+export const updateLedger = async (req, res) => {
+    try {
+        const { code, type, name } = req.body;
 
-//         const user = await prisma.users.findUnique({
-//             where: {
-//                 id: this._id,
-//             },
-//             select: {
-//                 name: true,
-//                 email: true,
-//             }.then((updatedUser) => {
-//                 return user.update({
-//                     where: {
-//                         id: this._id,
-//                     },
-//                     data: {
-//                         name,
-//                         email,
-//                     },
-//                     select: {
-//                         password: false,
-//                     },
-//                     returnNew: true,
-//                 });
-//             }),
-//         });
-//     } catch (error) {
-//         return res.status(500).json({
-//             message: "Internal Server Error.",
-//             status: "Error",
-//             Error: error.message,
-//         });
-//     }
-// };
+        if (!checkIfFieldValid(code, type, name)) {
+            return res.status(400).json({
+                message: "All fields are required, in string fromat.",
+                status: "Error",
+            });
+        }
+
+        if (!LEDGER_TYPES.includes(type)) {
+            return res.status(400).json({
+                message: "Ledger type can only be debit (Dr) or credit (Cr).",
+                status: "Error",
+            });
+        }
+
+        const ledger = await prisma.ledger.update({
+            where: {
+                code,
+            },
+            data: {
+                type,
+                name,
+            },
+        });
+
+        if (!ledger) {
+            return res.status(400).json({
+                message:
+                    "Could not find ledger with this code. PLease create one and try again.",
+                status: "Error",
+            });
+        }
+
+        return res.status(200).json({
+            message: "Ledger updated successfully.",
+            status: "Success",
+            data: ledger,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Internal Server Error.",
+            status: "Error",
+            Error: error.message,
+        });
+    }
+};
+
+export const allLedgers = async (res) => {
+    const ledgers = await prisma.ledger.findMany();
+    return res.status(200).json({
+        message: "Retrived all ledgers successfully.",
+        status: "Success",
+        data: ledgers,
+    });
+};

@@ -98,7 +98,7 @@ model invoices {
 model ledger {
   id         Int        @id @default(autoincrement())
   userId     Int
-  code       String
+  code       String     @unique
   name       String
   type       ledgerType
   user       users      @relation("userLedgers", fields: [userId], references: [id])
